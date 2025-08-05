@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring Agroteknologi IoT - UG MURO</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .data-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .data-panel h2 {
+            color: #2e7d32;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            text-align: center;
+            border-bottom: 3px solid #4caf50;
+            padding-bottom: 10px;
+        }
+
+        .sensor-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #4caf50;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sensor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .sensor-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 60px;
+            height: 60px;
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 50%;
+            transform: translate(20px, -20px);
+        }
+
+        .sensor-label {
+            font-weight: 600;
+            color: #2e7d32;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .sensor-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1565c0;
+            text-align: right;
+        }
+
+        .sensor-unit {
+            font-size: 1.2rem;
+            color: #666;
+            margin-left: 5px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #4caf50;
+            border-radius: 50%;
+            margin-right: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .charts-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .charts-panel h2 {
+            color: #2e7d32;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            text-align: center;
+            border-bottom: 3px solid #4caf50;
+            padding-bottom: 10px;
+        }
+
+        .chart-container {
+            margin-bottom: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-container iframe {
+            width: 100%;
+            height: 260px;
+            border: none;
+            border-radius: 15px;
+        }
+
+        .chart-title {
+            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+            color: white;
+            padding: 15px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .info-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-panel h3 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .refresh-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(76, 175, 80, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            body {
+                padding: 10px;
+            }
+            
+            .data-panel, .charts-panel {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="refresh-indicator">
+        <span id="refreshTimer">Refresh dalam: 5s</span>
+    </div>
+
+    <div class="header">
+        <h1>🌱 Monitoring Agroteknologi IoT</h1>
+        <p></p>
+    </div>
+
+    <div class="container">
+        <div class="left-section">
+            <div class="data-panel">
+                <h2>📊 Data Sensor Real-time</h2>
+                
+                <div class="sensor-card">
+                    <div class="sensor-label">
+                        <span class="status-indicator"></span>
+                        🌡️ Suhu Udara
+                    </div>
+                    <div class="sensor-value">
+                        <span id="temperature">--</span>
+                        <span class="sensor-unit">°C</span>
+                    </div>
+                </div>
+
+                <div class="sensor-card">
+                    <div class="sensor-label">
+                        <span class="status-indicator"></span>
+                        💨 Kelembaban Udara
+                    </div>
+                    <div class="sensor-value">
+                        <span id="humidity">--</span>
+                        <span class="sensor-unit">%</span>
+                    </div>
+                </div>
+
+                <div class="sensor-card">
+                    <div class="sensor-label">
+                        <span class="status-indicator"></span>
+                        💧 Kelembaban Tanah
+                    </div>
+                    <div class="sensor-value">
+                        <span id="soilMoisture">--</span>
+                        <span class="sensor-unit">%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3>ℹ️ Info Sistem</h3>
+                <div class="info-item">
+                    <span>Status Koneksi:</span>
+                    <span id="connectionStatus">🟢 Terhubung</span>
+                </div>
+                <div class="info-item">
+                    <span>Last Update:</span>
+                    <span id="lastUpdate">--</span>
+                </div>
+                <div class="info-item">
+                    <span>Channel ID:</span>
+                    <span>3018516</span>
+                </div>
+                <div class="info-item">
+                    <span>IP ESP32:</span>
+                    <span id="deviceIP">--</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-panel">
+            <h2>📈 Grafik ThingSpeak</h2>
+            
+            <div class="chart-container">
+                <div class="chart-title">🌡️ Grafik Suhu (Field 1)</div>
+                <iframe src="https://thingspeak.com/channels/3018516/charts/1?bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=60&type=line&update=15"></iframe>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">💨 Grafik Kelembaban Udara (Field 2)</div>
+                <iframe src="https://thingspeak.com/channels/3018516/charts/2?bgcolor=%23ffffff&color=%23ff7f0e&dynamic=true&results=60&type=line&update=15"></iframe>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">💧 Grafik Kelembaban Tanah (Field 3)</div>
+                <iframe src="https://thingspeak.com/channels/3018516/charts/3?bgcolor=%23ffffff&color=%232ca02c&dynamic=true&results=60&type=line&update=15"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let refreshTimer = 5;
+        let deviceIP = '192.168.1.100'; // Default IP, akan diperbarui secara otomatis
+
+        // Konfigurasi ThingSpeak
+        const THINGSPEAK_CHANNEL_ID = '3018516';
+        const THINGSPEAK_READ_API_KEY = 'M1CY0C218EVE677G';
+        
+        // Fungsi untuk mengambil data dari ThingSpeak API
+        async function fetchFromThingSpeak() {
+            try {
+                // Method 1: Direct API call
+                let apiUrl = `https://api.thingspeak.com/channels/${THINGSPEAK_CHANNEL_ID}/feeds/last.json?api_key=${THINGSPEAK_READ_API_KEY}`;
+                let response = await fetch(apiUrl);
+                
+                // Jika gagal karena CORS, coba tanpa API key (untuk public channel)
+                if (!response.ok) {
+                    apiUrl = `https://api.thingspeak.com/channels/${THINGSPEAK_CHANNEL_ID}/feeds/last.json`;
+                    response = await fetch(apiUrl);
+                }
+                
+                // Jika masih gagal, coba dengan CORS proxy
+                if (!response.ok) {
+                    apiUrl = `https://cors-anywhere.herokuapp.com/https://api.thingspeak.com/channels/${THINGSPEAK_CHANNEL_ID}/feeds/last.json`;
+                    response = await fetch(apiUrl);
+                }
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('ThingSpeak data:', data); // Debug log
+                    
+                    const thingSpeakData = {
+                        temperature: parseFloat(data.field1) || 0,
+                        humidity: parseFloat(data.field2) || 0,
+                        soil_moisture: parseInt(data.field3) || 0
+                    };
+                    
+                    updateSensorDisplay(thingSpeakData);
+                    document.getElementById('connectionStatus').innerHTML = '🟢 ThingSpeak API';
+                    document.getElementById('deviceIP').textContent = 'ThingSpeak Cloud';
+                    return true;
+                } else {
+                    console.log('ThingSpeak API response not OK:', response.status);
+                }
+            } catch (error) {
+                console.log('ThingSpeak API error:', error);
+            }
+            return false;
+        }
+
+        // Alternative: Fetch via JSONP (untuk menghindari CORS)
+        async function fetchFromThingSpeakJSONP() {
+            return new Promise((resolve) => {
+                const script = document.createElement('script');
+                const callbackName = 'thingspeakCallback_' + Date.now();
+                
+                window[callbackName] = function(data) {
+                    console.log('ThingSpeak JSONP data:', data); // Debug log
+                    
+                    if (data && data.feeds && data.feeds.length > 0) {
+                        const latestData = data.feeds[data.feeds.length - 1];
+                        const thingSpeakData = {
+                            temperature: parseFloat(latestData.field1) || 0,
+                            humidity: parseFloat(latestData.field2) || 0,
+                            soil_moisture: parseInt(latestData.field3) || 0
+                        };
+                        
+                        updateSensorDisplay(thingSpeakData);
+                        document.getElementById('connectionStatus').innerHTML = '🟢 ThingSpeak JSONP';
+                        document.getElementById('deviceIP').textContent = 'ThingSpeak Cloud';
+                        resolve(true);
+                    } else {
+                        resolve(false);
+                    }
+                    
+                    // Cleanup
+                    document.head.removeChild(script);
+                    delete window[callbackName];
+                };
+                
+                script.src = `https://api.thingspeak.com/channels/${THINGSPEAK_CHANNEL_ID}/feeds.json?results=1&callback=${callbackName}`;
+                script.onerror = () => {
+                    console.log('JSONP request failed');
+                    document.head.removeChild(script);
+                    delete window[callbackName];
+                    resolve(false);
+                };
+                
+                document.head.appendChild(script);
+                
+                // Timeout setelah 5 detik
+                setTimeout(() => {
+                    if (document.head.contains(script)) {
+                        document.head.removeChild(script);
+                        delete window[callbackName];
+                        resolve(false);
+                    }
+                }, 5000);
+            });
+        }
+
+        // Fungsi untuk mengambil data dari ESP32 local
+        async function fetchFromESP32() {
+            try {
+                const possibleIPs = ['192.168.1.100', '192.168.4.1', '10.0.0.100'];
+                
+                for (let ip of possibleIPs) {
+                    try {
+                        const response = await fetch(`http://${ip}/data`, {
+                            method: 'GET',
+                            timeout: 3000
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            updateSensorDisplay(data);
+                            deviceIP = ip;
+                            document.getElementById('deviceIP').textContent = ip;
+                            document.getElementById('connectionStatus').innerHTML = '🟢 ESP32 Local';
+                            return true;
+                        }
+                    } catch (e) {
+                        continue;
+                    }
+                }
+            } catch (error) {
+                console.log('ESP32 connection error:', error);
+            }
+            return false;
+        }
+
+        // Fungsi utama untuk mengambil data (prioritas: ESP32 -> ThingSpeak -> JSONP -> Simulasi)
+        async function fetchSensorData() {
+            console.log('Fetching sensor data...'); // Debug log
+            
+            // Coba ESP32 dulu (data real-time)
+            const esp32Success = await fetchFromESP32();
+            if (esp32Success) {
+                console.log('Data from ESP32 successful');
+                return;
+            }
+            
+            // Jika ESP32 gagal, coba ThingSpeak API
+            const thingSpeakSuccess = await fetchFromThingSpeak();
+            if (thingSpeakSuccess) {
+                console.log('Data from ThingSpeak API successful');
+                return;
+            }
+            
+            // Jika API gagal, coba JSONP
+            const jsonpSuccess = await fetchFromThingSpeakJSONP();
+            if (jsonpSuccess) {
+                console.log('Data from ThingSpeak JSONP successful');
+                return;
+            }
+            
+            // Jika semua sumber gagal, gunakan data simulasi
+            console.log('All sources failed, using simulated data');
+            generateSimulatedData();
+            document.getElementById('connectionStatus').innerHTML = '🟡 Mode Simulasi';
+        }
+
+        // Fungsi untuk memperbarui tampilan sensor
+        function updateSensorDisplay(data) {
+            document.getElementById('temperature').textContent = data.temperature.toFixed(1);
+            document.getElementById('humidity').textContent = data.humidity.toFixed(1);
+            document.getElementById('soilMoisture').textContent = data.soil_moisture;
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('id-ID');
+        }
+
+        // Fungsi untuk menghasilkan data simulasi
+        function generateSimulatedData() {
+            const now = new Date();
+            const hour = now.getHours();
+            
+            // Simulasi data yang realistis berdasarkan waktu
+            const baseTemp = 25 + Math.sin((hour - 6) * Math.PI / 12) * 8;
+            const baseHumidity = 60 + Math.sin((hour - 3) * Math.PI / 12) * 25;
+            const baseSoil = 45 + Math.sin((hour - 9) * Math.PI / 24) * 20;
+            
+            const simulatedData = {
+                temperature: baseTemp + (Math.random() - 0.5) * 2,
+                humidity: Math.max(20, Math.min(95, baseHumidity + (Math.random() - 0.5) * 10)),
+                soil_moisture: Math.max(10, Math.min(90, Math.round(baseSoil + (Math.random() - 0.5) * 15)))
+            };
+            
+            updateSensorDisplay(simulatedData);
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('id-ID');
+        }
+
+        // Timer untuk refresh otomatis
+        function startRefreshTimer() {
+            const timerElement = document.getElementById('refreshTimer');
+            
+            setInterval(() => {
+                refreshTimer--;
+                timerElement.textContent = `Refresh dalam: ${refreshTimer}s`;
+                
+                if (refreshTimer <= 0) {
+                    fetchSensorData();
+                    refreshTimer = 5;
+                }
+            }, 1000);
+        }
+
+        // Inisialisasi saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchSensorData();
+            startRefreshTimer();
+            
+            // Refresh data setiap 5 detik
+            setInterval(fetchSensorData, 5000);
+        });
+
+        // Tambahkan event listener untuk refresh manual
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'F5' || (event.ctrlKey && event.key === 'r')) {
+                fetchSensorData();
+                refreshTimer = 5;
+            }
+        });
+    </script>
+</body>
+</html>
